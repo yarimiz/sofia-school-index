@@ -202,45 +202,45 @@ const schoolsData = [
         name: "Cosmos International School",
         type: "Private",
         language: "English",
-        district: "Sofia",
-        address: "Sofia, Bulgaria",
+        district: "Sofia Region (Osoitsa)",
+        address: "Osoitsa village, Sofia Region (Campus)",
         tuition: 6600,
         phone: "",
         email: "",
-        web: "https://cosmosschool.bg",
-        features: "British curriculum. Ages 5-18. Source: International Schools Database.",
-        lat: 42.6850,
-        lng: 23.3200
+        web: "https://cischool.bg",
+        features: "British curriculum. Ages 5-18. Campus outside Sofia city.",
+        lat: 42.7454,
+        lng: 23.7541
     },
     {
         id: 15,
         name: "Change the World Schools",
         type: "Private",
         language: "English",
-        district: "Sofia",
-        address: "Sofia, Bulgaria",
+        district: "Mladost 4",
+        address: "ul. Arh. Bogdan Tomalevski, Sofia",
         tuition: 8200,
         phone: "",
         email: "",
-        web: "https://ctws.bg",
-        features: "American curriculum. Ages 4-14. Project-based learning. Source: International Schools Database.",
-        lat: 42.6750,
-        lng: 23.3150
+        web: "https://www.ctwschools.com",
+        features: "American curriculum. Ages 4-14. Project-based learning.",
+        lat: 42.6274,
+        lng: 23.3716
     },
     {
         id: 16,
         name: "Maple Bear Sofia",
         type: "Private",
         language: "English",
-        district: "Sofia",
-        address: "Sofia, Bulgaria",
+        district: "Boyana",
+        address: "38 Panoramen Pyt, 1616 Sofia",
         tuition: 7000,
         phone: "",
         email: "",
-        web: "https://maplebear.bg",
-        features: "Canadian curriculum. Ages 5-10. Elementary focus. Source: International Schools Database.",
-        lat: 42.6700,
-        lng: 23.3100
+        web: "https://sofia-school.maplebear.bg/en/",
+        features: "Canadian curriculum. Ages 5-10. Elementary focus.",
+        lat: 42.6548,
+        lng: 23.2550
     },
     {
         id: 17,
@@ -322,15 +322,15 @@ const schoolsData = [
         name: "125 SU (Boyan Penev)",
         type: "Public",
         language: "Bulgarian",
-        district: "Mladost",
-        address: "Mladost District, Sofia",
+        district: "Mladost 1",
+        address: "ul. Nikola Genadiev, Mladost 1, Sofia",
         tuition: 0,
         phone: "",
         email: "",
         web: "https://125su.bg",
         features: "Hosts math competitions. Strong STEM reputation. Source: Danybon math competition mentions.",
-        lat: 42.6475,
-        lng: 23.3820
+        lat: 42.6530,
+        lng: 23.3785
     }
 ];
 
