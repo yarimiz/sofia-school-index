@@ -19,13 +19,32 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e0e7ff 100%);
             color: #1e293b;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
         }
 
         /* Custom Scrollbar for the Table */
@@ -35,7 +54,7 @@
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: transparent;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -58,20 +77,26 @@
         #map {
             width: 100%;
             height: 100%;
-            min-height: 400px;
-            border-radius: 0.75rem;
+            min-height: 500px;
             z-index: 1;
         }
 
+        .row-hover {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .row-hover:hover {
-            background-color: #f1f5f9;
+            background-color: rgba(238, 242, 255, 0.6);
+            /* indigo-50 with opacity */
             cursor: pointer;
-            transition: background-color 0.15s;
+            transform: translateY(-1px);
         }
 
         .active-row {
-            background-color: #e2e8f0;
-            border-left: 4px solid #3b82f6;
+            background-color: #eff6ff;
+            /* blue-50 */
+            border-left: 4px solid #4f46e5;
+            /* indigo-600 */
         }
     </style>
 
@@ -93,123 +118,167 @@
 <body class="bg-slate-50 text-slate-800">
 
     <!-- Navigation / Header -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <nav class="glass-header sticky top-0 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center gap-2">
-                        <span class="text-2xl">🏫</span>
-                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">Sofia Primary Schools <span
-                                class="text-slate-500 font-normal text-sm ml-2">1st Grade Entry Guide</span></h1>
+                    <div class="flex-shrink-0 flex items-center gap-3">
+                        <span class="text-3xl filter drop-shadow-sm">🏫</span>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">Sofia Schools</h1>
+                            <span class="text-indigo-600 font-semibold text-xs uppercase tracking-wider">Explorer
+                                2025</span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="resetFilters()" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Reset
-                        View</button>
-                    <div class="text-xs text-slate-400">Data Year: 2024/25</div>
+                <div class="flex items-center space-x-6">
+                    <div
+                        class="text-xs font-medium text-slate-500 bg-white/50 px-3 py-1 rounded-full border border-slate-200/50">
+                        Data: 2024/25</div>
+                    <button onclick="resetFilters()"
+                        class="text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
+                        Reset View
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <!-- Intro Section -->
-        <div class="mb-8">
-            <h2 class="text-lg font-semibold text-slate-700 mb-2">Interactive School Map & Directory</h2>
-            <p class="text-slate-600 max-w-3xl leading-relaxed">
-                Explore high-quality 1st-grade options across Sofia. Use the table to compare details or the map to find
-                schools near your home or office.
-                <strong>Click markers on the map</strong> to highlight the corresponding school in the list.
+        <div class="mb-10 text-center">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Interactive School Map & Directory
+            </h2>
+            <p class="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+                Explore high-quality 1st-grade options across Sofia. Compare tuitions, locations, and programs in one
+                modern dashboard.
             </p>
         </div>
 
         <!-- Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-auto lg:h-[800px]">
 
-            <!-- Left Column: The List (Span 5) - Scrollable container -->
-            <div class="lg:col-span-5 flex flex-col gap-6 h-full overflow-hidden">
+            <!-- Left Column: The List (Span 5) -->
+            <div class="lg:col-span-5 flex flex-col h-full overflow-hidden">
 
                 <!-- Table Card -->
-                <div
-                    class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col flex-grow overflow-hidden">
-                    <div class="px-4 py-3 border-b border-slate-100 bg-slate-50 shrink-0">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-semibold text-slate-800">Directory</h3>
-                            <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border">Select to
-                                Locate</span>
-                        </div>
+                <div class="glass-panel rounded-3xl shadow-xl flex flex-col flex-grow overflow-hidden relative">
+                    <div
+                        class="px-6 py-5 border-b border-slate-100/50 bg-white/50 shrink-0 flex justify-between items-center backdrop-blur-sm z-20">
+                        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> Directory
+                        </h3>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select to
+                            Locate</span>
                     </div>
 
-                    <div class="overflow-auto custom-scrollbar flex-grow">
+                    <div class="overflow-auto custom-scrollbar flex-grow bg-white/30">
                         <table class="w-full text-sm text-left text-slate-600">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                            <thead
+                                class="text-xs font-bold text-slate-500 uppercase bg-white/80 sticky top-0 z-10 backdrop-blur-md shadow-sm">
                                 <tr>
-                                    <th scope="col" class="px-4 py-3 cursor-pointer hover:bg-slate-100"
+                                    <th scope="col"
+                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 transition-colors"
                                         onclick="sortTable('name')">Name ↕</th>
-                                    <th scope="col" class="px-2 py-3 cursor-pointer hover:bg-slate-100 text-right"
+                                    <th scope="col"
+                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 text-right transition-colors"
                                         onclick="sortTable('tuition')">Fee (€) ↕</th>
                                 </tr>
                             </thead>
-                            <tbody id="schools-table-body" class="divide-y divide-slate-100">
+                            <tbody id="schools-table-body" class="divide-y divide-slate-100/60">
                                 <!-- Rows generated by JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- Selected School Details Panel -->
-                <div id="detail-panel"
-                    class="bg-white rounded-xl shadow-lg border-l-4 border-blue-500 p-6 hidden animate-fade-in shrink-0">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span id="detail-badge"
-                                class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Private</span>
-                            <h2 id="detail-name" class="text-xl font-bold text-slate-800 mt-1">School Name</h2>
-                        </div>
-                        <div class="text-right">
-                            <p id="detail-tuition" class="text-lg font-bold text-slate-800">€0</p>
-                        </div>
-                    </div>
-
-                    <p id="detail-address" class="text-sm font-medium text-slate-700 flex items-start gap-1 mb-4">
-                        📍 <span class="italic">123 Street Address, Sofia</span>
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-4 text-xs border-t border-slate-100 pt-3">
-                        <div>
-                            <p class="font-bold text-slate-500 uppercase">Contact</p>
-                            <p id="detail-phone" class="text-slate-800 mt-1">+359 ...</p>
-                            <a id="detail-web" href="#" target="_blank"
-                                class="text-blue-600 hover:underline block mt-1">Website ↗</a>
-                        </div>
-                        <div>
-                            <p class="font-bold text-slate-500 uppercase">Highlights</p>
-                            <p id="detail-features" class="text-slate-600 mt-1 leading-tight">Features text...</p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Right Column: Visuals (Span 7) -->
-            <div class="lg:col-span-7 flex flex-col gap-6 h-full">
+            <div class="lg:col-span-7 flex flex-col gap-6 h-full relative">
 
-                <!-- Map Container (Takes majority of height) -->
-                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex-grow relative">
-                    <div id="map"></div>
-                    <div
-                        class="absolute bottom-4 left-4 z-[500] bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-medium text-slate-600">
-                        Leaflet | © OpenStreetMap
+                <!-- Detail Panel (Now Floating over Map area logic handled via z-index or placement) -->
+                <!-- We will keep it separate but styled to float conceptually or sit nicely -->
+
+                <!-- Map Container -->
+                <div class="glass-panel p-1.5 rounded-3xl shadow-xl flex-grow relative overflow-hidden group">
+                    <div id="map" class="rounded-[1.2rem]"></div>
+
+                    <!-- Floating Detail Panel (Hidden by default) -->
+                    <div id="detail-panel"
+                        class="absolute top-4 right-4 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 p-6 hidden animate-fade-in z-[1000] transition-all duration-300">
+
+                        <div class="flex justify-between items-start mb-4">
+                            <span id="detail-badge"
+                                class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
+                            <button onclick="closeDetailPanel()"
+                                class="text-slate-400 hover:text-slate-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <h2 id="detail-name" class="text-2xl font-extrabold text-slate-900 leading-tight mb-1"></h2>
+                        <div class="flex items-baseline gap-1 mb-6">
+                            <span id="detail-tuition" class="text-2xl font-bold text-indigo-600"></span>
+                            <span class="text-sm text-slate-400 font-medium">/ year</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <div class="mt-1 bg-indigo-50 p-1.5 rounded-lg text-indigo-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <p id="detail-address" class="text-sm text-slate-600 font-medium leading-snug pt-0.5">
+                                </p>
+                            </div>
+
+                            <div class="border-t border-slate-100 my-4"></div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Contact</p>
+                                    <p id="detail-phone" class="text-sm font-semibold text-slate-800 mb-1"></p>
+                                    <a id="detail-web" href="#" target="_blank"
+                                        class="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 transition-colors">
+                                        Visit Website
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                        Features</p>
+                                    <p id="detail-features" class="text-xs text-slate-600 leading-relaxed"></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Tuition Chart (Smaller height at bottom) -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0 h-[300px]">
-                    <div class="mb-2 flex justify-between items-center">
-                        <h3 class="font-semibold text-slate-800 text-sm">Tuition Comparison</h3>
+                <div class="glass-panel p-5 rounded-3xl shadow-xl shrink-0 h-[280px] flex flex-col justify-center">
+                    <div class="mb-2 flex justify-between items-center px-2">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Tuition Overview
+                        </h3>
                     </div>
-                    <div class="chart-wrapper h-[240px]">
+                    <div class="chart-wrapper h-[220px]">
                         <canvas id="tuitionChart"></canvas>
                     </div>
                 </div>
@@ -288,41 +357,41 @@
 
             const data = getFilteredData();
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="px-6 py-8 text-center text-slate-400">No schools match filters.</td></tr>`;
-                return;
-            }
-
             data.forEach(school => {
                 const tr = document.createElement('tr');
-                tr.className = `border-b border-slate-50 row-hover ${state.selectedId === school.id ? 'active-row' : ''}`;
-                tr.onclick = () => selectSchool(school.id, true); // true = fly to map
+                const isSelected = state.selectedId === school.id;
+                tr.className = `border-b border-slate-50/50 row-hover transition-all duration-200 ${isSelected ? 'active-row bg-indigo-50/50' : 'hover:bg-slate-50/50'}`;
+                tr.onclick = () => selectSchool(school.id, true);
 
-                const tuitionDisplay = school.tuition === 0 ? '<span class="text-green-600 font-medium">Free</span>' : `€${(school.tuition / 1000).toFixed(1)}k`;
+                const tuitionDisplay = school.tuition === 0
+                    ? '<span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded-md text-xs">Free</span>'
+                    : `<span class="font-bold text-slate-700">€${(school.tuition / 1000).toFixed(1)}k</span>`;
 
-                // Type badge colors
+                // Type badge
                 const typeBadge = school.type === 'Private'
-                    ? '<span class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Private</span>'
-                    : '<span class="bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5 rounded-full">Public</span>';
+                    ? '<span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Private</span>'
+                    : '<span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Public</span>';
 
                 // Language badge colors
                 const langColors = {
-                    'Bulgarian': 'bg-slate-100 text-slate-700',
-                    'English': 'bg-purple-100 text-purple-700',
+                    'Bulgarian': 'bg-slate-100 text-slate-600',
+                    'English': 'bg-violet-100 text-violet-700',
                     'German': 'bg-amber-100 text-amber-700',
                     'French': 'bg-rose-100 text-rose-700',
                     'Bilingual': 'bg-teal-100 text-teal-700'
                 };
                 const langClass = langColors[school.language] || 'bg-slate-100 text-slate-700';
-                const langBadge = `<span class="${langClass} text-xs font-medium px-2 py-0.5 rounded-full">${school.language}</span>`;
+                const langBadge = `<span class="${langClass} text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm border border-black/5">${school.language}</span>`;
 
                 tr.innerHTML = `
-                    <td class="px-4 py-3">
-                        <div class="font-medium text-slate-800 text-sm leading-tight">${school.name}</div>
-                        <div class="text-xs text-slate-400 mt-1">${school.district}</div>
-                        <div class="flex gap-1.5 mt-2">${typeBadge}${langBadge}</div>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800 text-sm leading-tight mb-1">${school.name}</div>
+                        <div class="text-xs text-slate-400 font-medium mb-2">${school.district}</div>
+                        <div class="flex gap-2">${typeBadge}${langBadge}</div>
                     </td>
-                    <td class="px-2 py-3 text-right font-medium text-slate-600 align-top">${tuitionDisplay}</td>
+                    <td class="px-6 py-4 text-right align-top">
+                        ${tuitionDisplay}
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -342,17 +411,24 @@
 
             document.getElementById('detail-name').textContent = s.name;
             document.getElementById('detail-tuition').textContent = s.tuition === 0 ? "Free" : `€${s.tuition.toLocaleString()}`;
-            document.getElementById('detail-address').innerHTML = `📍 <span class="italic">${s.address}</span>`;
+            document.getElementById('detail-address').innerHTML = s.address;
+            document.getElementById('detail-phone').textContent = s.phone || "N/A";
+            document.getElementById('detail-web').href = s.web;
+            document.getElementById('detail-features').textContent = s.features;
 
             const badge = document.getElementById('detail-badge');
             badge.textContent = s.type;
             badge.className = s.type === 'Private'
-                ? 'bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded'
-                : 'bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded';
+                ? 'px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700'
+                : 'px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700';
+        }
 
-            document.getElementById('detail-phone').textContent = s.phone;
-            document.getElementById('detail-web').href = s.web;
-            document.getElementById('detail-features').textContent = s.features;
+        function closeDetailPanel() {
+            state.selectedId = null;
+            renderDetailPanel();
+            renderTable();
+            updateChart();
+            map.closePopup();
         }
 
         // --- Charts ---
@@ -360,6 +436,11 @@
 
         function initCharts() {
             const ctx = document.getElementById('tuitionChart').getContext('2d');
+            // Gradient fill for chart bars
+            const gradientPrivate = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientPrivate.addColorStop(0, '#818cf8'); // indigo-400
+            gradientPrivate.addColorStop(1, '#6366f1'); // indigo-500
+
             tuitionChartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -367,9 +448,10 @@
                     datasets: [{
                         label: 'Annual Tuition (€)',
                         data: [],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4,
-                        barPercentage: 0.6
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6,
+                        barThickness: 12,
+                        hoverBackgroundColor: '#4f46e5'
                     }]
                 },
                 options: {
@@ -378,12 +460,30 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#1e293b',
+                            bodyColor: '#4f46e5',
+                            bodyFont: { weight: 'bold' },
+                            padding: 12,
+                            borderColor: 'rgba(226, 232, 240, 0.8)',
+                            borderWidth: 1,
                             callbacks: { label: (ctx) => `€${ctx.raw.toLocaleString()}` }
                         }
                     },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
-                        x: { grid: { display: false }, ticks: { display: false } } // Hide labels on small chart
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9', drawBorder: false },
+                            ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 10 }, color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { display: false }
+                        }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
                     }
                 }
             });
@@ -397,7 +497,7 @@
             tuitionChartInstance.data.labels = data.map(s => s.name);
             tuitionChartInstance.data.datasets[0].data = data.map(s => s.tuition);
             tuitionChartInstance.data.datasets[0].backgroundColor = data.map(s =>
-                s.id === state.selectedId ? '#1d4ed8' : '#93c5fd'
+                s.id === state.selectedId ? '#4f46e5' : '#a5b4fc' // Active: indigo-600, Inactive: indigo-300
             );
             tuitionChartInstance.update();
         }
