@@ -134,7 +134,7 @@
                 <div class="flex items-center space-x-6">
                     <div
                         class="text-xs font-medium text-slate-500 bg-white/50 px-3 py-1 rounded-full border border-slate-200/50">
-                        Data: 2024/25</div>
+                        Data: 2025/26 (2026/27 where available)</div>
                     <button onclick="resetFilters()"
                         class="text-sm bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 font-semibold py-2 px-4 rounded-full transition-colors duration-200">
                         Reset View
@@ -160,8 +160,8 @@
         <!-- Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-auto lg:h-[800px]">
 
-            <!-- Left Column: The List (Span 5) -->
-            <div class="lg:col-span-5 flex flex-col h-full overflow-hidden">
+            <!-- Left Column: The List (Span 7) -->
+            <div class="lg:col-span-7 flex flex-col h-full overflow-hidden">
 
                 <!-- Table Card -->
                 <div class="glass-panel rounded-3xl shadow-xl flex flex-col flex-grow overflow-hidden relative">
@@ -175,15 +175,18 @@
                     </div>
 
                     <div class="overflow-auto custom-scrollbar flex-grow bg-white/30">
-                        <table class="w-full text-sm text-left text-slate-600">
+                        <table class="w-full text-sm text-left text-slate-600 border-separate border-spacing-0">
                             <thead
                                 class="text-xs font-bold text-slate-500 uppercase bg-white/80 sticky top-0 z-10 backdrop-blur-md shadow-sm">
                                 <tr>
                                     <th scope="col"
-                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 transition-colors"
+                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 transition-colors w-1/3"
                                         onclick="sortTable('name')">Name ↕</th>
+                                    <th scope="col" class="px-2 py-4 text-center w-[12%]">One-Time</th>
+                                    <th scope="col" class="px-2 py-4 text-center w-[12%]">Food</th>
+                                    <th scope="col" class="px-2 py-4 text-center w-[12%]">Transport</th>
                                     <th scope="col"
-                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 text-right transition-colors"
+                                        class="px-6 py-4 cursor-pointer hover:text-indigo-600 text-right transition-colors w-[15%]"
                                         onclick="sortTable('tuition')">Fee (€) ↕</th>
                                 </tr>
                             </thead>
@@ -195,8 +198,8 @@
                 </div>
             </div>
 
-            <!-- Right Column: Visuals (Span 7) -->
-            <div class="lg:col-span-7 flex flex-col gap-6 h-full relative">
+            <!-- Right Column: Visuals (Span 5) -->
+            <div class="lg:col-span-5 flex flex-col gap-6 h-full relative">
 
                 <!-- Detail Panel (Now Floating over Map area logic handled via z-index or placement) -->
                 <!-- We will keep it separate but styled to float conceptually or sit nicely -->
@@ -247,6 +250,25 @@
                             <div class="border-t border-slate-100 my-4"></div>
 
                             <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2">
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fees
+                                        Structure</p>
+                                    <div class="grid grid-cols-3 gap-2 text-xs">
+                                        <div class="bg-slate-50 p-2 rounded-lg">
+                                            <span class="block text-slate-400 text-[10px] uppercase">One-Time</span>
+                                            <span id="detail-one-time" class="font-semibold text-slate-700"></span>
+                                        </div>
+                                        <div class="bg-slate-50 p-2 rounded-lg">
+                                            <span class="block text-slate-400 text-[10px] uppercase">Food</span>
+                                            <span id="detail-food" class="font-semibold text-slate-700"></span>
+                                        </div>
+                                        <div class="bg-slate-50 p-2 rounded-lg">
+                                            <span class="block text-slate-400 text-[10px] uppercase">Transport</span>
+                                            <span id="detail-transport" class="font-semibold text-slate-700"></span>
+                                        </div>
+                                    </div>
+                                    <p id="detail-fee-notes" class="text-[10px] text-slate-400 mt-1 italic"></p>
+                                </div>
                                 <div>
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                                         Contact</p>
@@ -389,6 +411,15 @@
                         <div class="text-xs text-slate-400 font-medium mb-2">${school.district}</div>
                         <div class="flex gap-2">${typeBadge}${langBadge}</div>
                     </td>
+                    <td class="px-2 py-4 text-center text-xs text-slate-500 align-top max-w-[100px] truncate" title="${school.oneTimeFee || 'N/A'}">
+                        ${school.oneTimeFee || '-'}
+                    </td>
+                    <td class="px-2 py-4 text-center text-xs text-slate-500 align-top max-w-[100px] truncate" title="${school.foodFee || 'N/A'}">
+                        ${school.foodFee || '-'}
+                    </td>
+                    <td class="px-2 py-4 text-center text-xs text-slate-500 align-top max-w-[100px] truncate" title="${school.transportFee || 'N/A'}">
+                        ${school.transportFee || '-'}
+                    </td>
                     <td class="px-6 py-4 text-right align-top">
                         ${tuitionDisplay}
                     </td>
@@ -415,6 +446,12 @@
             document.getElementById('detail-phone').textContent = s.phone || "N/A";
             document.getElementById('detail-web').href = s.web;
             document.getElementById('detail-features').textContent = s.features;
+
+            // New Fee Fields
+            document.getElementById('detail-one-time').textContent = s.oneTimeFee || "N/A";
+            document.getElementById('detail-food').textContent = s.foodFee || "N/A";
+            document.getElementById('detail-transport').textContent = s.transportFee || "N/A";
+            document.getElementById('detail-fee-notes').textContent = s.feeNotes || "";
 
             const badge = document.getElementById('detail-badge');
             badge.textContent = s.type;
