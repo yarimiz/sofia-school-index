@@ -8,25 +8,19 @@ This tool provides a user-friendly interface to browse school data, visualize lo
 
 ## Features
 
--   **Interactive Map:** Visualizes school locations using [Leaflet.js](https://leafletjs.com/) with OpenStreetMap tiles.
--   **Directory List:** A sortable table of schools showing name, district, type, and tuition fees.
--   **Filtering & Search:**
-    -   Filter by School Type (Private/Public)
-    -   Filter by Primary Language (Bulgarian, English, German, French)
-    -   Real-time text search for names, addresses, or districts
--   **Data Visualization:**
-    -   **KPI Cards:** Summary statistics for total schools, average tuition, and dominant language.
-    -   **Tuition Chart:** A bar chart comparing annual tuition fees for private schools (powered by [Chart.js](https://www.chartjs.org/)).
--   **School Details:** Select a school to view detailed information including contact details, website links, and key features.
--   **Responsive Design:** Fully responsive layout using [Tailwind CSS](https://tailwindcss.com/).
+- **Interactive Map:** Visualizes school locations using [Leaflet.js](https://leafletjs.com/) with OpenStreetMap tiles.
+- **Directory List:** A sortable table of schools showing name, district, tuition fees, and property badges (Type & Language).
+- **Tuition Chart:** A bar chart comparing annual tuition fees for private schools (powered by [Chart.js](https://www.chartjs.org/)).
+- **School Details:** Select a school to view detailed information including contact details, website links, and key features.
+- **Responsive Design:** Fully responsive layout using [Tailwind CSS](https://tailwindcss.com/).
 
 ## Technologies Used
 
--   **HTML5**
--   **Tailwind CSS** (via CDN) for styling
--   **Leaflet.js** (via CDN) for maps
--   **Chart.js** (via CDN) for charts
--   **Vanilla JavaScript** for logic and state management
+- **HTML5**
+- **Tailwind CSS** (via CDN) for styling
+- **Leaflet.js** (via CDN) for maps
+- **Chart.js** (via CDN) for charts
+- **Vanilla JavaScript** for logic and state management
 
 ## Setup & Usage
 
@@ -38,7 +32,18 @@ This project is a static HTML file with no build step required.
 
 ## Data Source
 
-The school data is currently embedded directly within the `index.html` file in the `schoolsData` array. It includes real names, addresses, coordinates, and tuition estimates for the 2024/25 school year.
+The school data is stored in `schools.js` as the `schoolsData` array. It includes **22 schools** with real names, addresses, coordinates, and tuition estimates for the 2024/25 school year.
 
-*Note: Data is for demonstration and informational purposes. Please verify specific details with the respective schools.*
+**Schools include:**
 
+- 18 Private/International schools (IB, British, American, Canadian, German, French curricula)
+- 4 Public municipal schools (high-performing per NVO data)
+
+**Sources used:**
+
+- International Schools Database (https://international-schools-database.com)
+- John Catt International School Search
+- Danybon NVO rankings (https://danybon.com)
+- Official school websites
+
+_Note: Data is for demonstration and informational purposes. Please verify specific details with the respective schools._
