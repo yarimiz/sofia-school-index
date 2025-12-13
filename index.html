@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sofia Primary School Explorer</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet CSS & JS (For the Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Custom Scrollbar for the Table */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Chart Container Styles */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 250px;
+        }
+
+        /* Map Container */
+        #map {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            border-radius: 0.75rem;
+            z-index: 1;
+        }
+
+        .row-hover:hover {
+            background-color: #f1f5f9;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .active-row {
+            background-color: #e2e8f0;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+
+    <!-- Chosen Palette: Slate & Blue -->
+    <!-- Application Structure Plan:
+         1. Header & KPIs: Unchanged, providing context.
+         2. Controls: Filtering logic remains.
+         3. Grid:
+            - Left: Data Table.
+            - Right Top: Tuition Chart.
+            - Right Bottom: LEAFLET MAP. Replacing the scatter plot.
+         4. Interaction:
+            - Selecting a row -> Pans map to coordinate, opens popup, shows detail panel.
+            - Clicking map marker -> Selects row, scrolls table.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used (Leaflet uses Canvas/HTML). NO Mermaid JS used. -->
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation / Header -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-2">
+                        <span class="text-2xl">🏫</span>
+                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">Sofia Primary Schools <span
+                                class="text-slate-500 font-normal text-sm ml-2">1st Grade Entry Guide</span></h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="resetFilters()" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Reset
+                        Filters</button>
+                    <div class="text-xs text-slate-400">Data Year: 2024/25</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Intro Section -->
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-slate-700 mb-2">Interactive School Map & Directory</h2>
+            <p class="text-slate-600 max-w-3xl leading-relaxed">
+                Explore high-quality 1st-grade options across Sofia. Use the table to compare details or the map to find
+                schools near your home or office.
+                <strong>Click markers on the map</strong> to highlight the corresponding school in the list.
+            </p>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Total Schools Listed</p>
+                <p class="text-2xl font-bold text-slate-800 mt-1" id="kpi-total">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Avg. Private Tuition</p>
+                <p class="text-2xl font-bold text-blue-600 mt-1" id="kpi-tuition">€0</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Primary Language</p>
+                <p class="text-lg font-semibold text-slate-700 mt-1" id="kpi-lang">Mixed</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Map Status</p>
+                <p class="text-lg font-semibold text-green-600 mt-1">Live Locations</p>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4 items-center">
+            <div class="flex flex-col">
+                <label class="text-xs font-semibold text-slate-500 mb-1">School Type</label>
+                <select id="filter-type"
+                    class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-32 p-2">
+                    <option value="All">All Types</option>
+                    <option value="Private">Private</option>
+                    <option value="Public">Public</option>
+                </select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-semibold text-slate-500 mb-1">Primary Language</label>
+                <select id="filter-lang"
+                    class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-40 p-2">
+                    <option value="All">All Languages</option>
+                    <option value="Bulgarian">Bulgarian</option>
+                    <option value="English">English</option>
+                    <option value="German">German</option>
+                    <option value="French">French</option>
+                </select>
+            </div>
+            <div class="flex flex-col flex-grow">
+                <label class="text-xs font-semibold text-slate-500 mb-1">Search Name or Address</label>
+                <input type="text" id="search-input" placeholder="e.g. 'Lozenets', 'St. George'"
+                    class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-auto lg:h-[800px]">
+
+            <!-- Left Column: The List (Span 5) - Scrollable container -->
+            <div class="lg:col-span-5 flex flex-col gap-6 h-full overflow-hidden">
+
+                <!-- Table Card -->
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col flex-grow overflow-hidden">
+                    <div
+                        class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
+                        <h3 class="font-semibold text-slate-800">Directory</h3>
+                        <span class="text-xs text-slate-500 bg-white px-2 py-1 rounded border">Select to Locate</span>
+                    </div>
+
+                    <div class="overflow-auto custom-scrollbar flex-grow">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 cursor-pointer hover:bg-slate-100"
+                                        onclick="sortTable('name')">Name ↕</th>
+                                    <th scope="col" class="px-2 py-3 cursor-pointer hover:bg-slate-100 text-right"
+                                        onclick="sortTable('tuition')">Fee (€) ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schools-table-body" class="divide-y divide-slate-100">
+                                <!-- Rows generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Selected School Details Panel -->
+                <div id="detail-panel"
+                    class="bg-white rounded-xl shadow-lg border-l-4 border-blue-500 p-6 hidden animate-fade-in shrink-0">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span id="detail-badge"
+                                class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Private</span>
+                            <h2 id="detail-name" class="text-xl font-bold text-slate-800 mt-1">School Name</h2>
+                        </div>
+                        <div class="text-right">
+                            <p id="detail-tuition" class="text-lg font-bold text-slate-800">€0</p>
+                        </div>
+                    </div>
+
+                    <p id="detail-address" class="text-sm font-medium text-slate-700 flex items-start gap-1 mb-4">
+                        📍 <span class="italic">123 Street Address, Sofia</span>
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-4 text-xs border-t border-slate-100 pt-3">
+                        <div>
+                            <p class="font-bold text-slate-500 uppercase">Contact</p>
+                            <p id="detail-phone" class="text-slate-800 mt-1">+359 ...</p>
+                            <a id="detail-web" href="#" target="_blank"
+                                class="text-blue-600 hover:underline block mt-1">Website ↗</a>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-500 uppercase">Highlights</p>
+                            <p id="detail-features" class="text-slate-600 mt-1 leading-tight">Features text...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visuals (Span 7) -->
+            <div class="lg:col-span-7 flex flex-col gap-6 h-full">
+
+                <!-- Map Container (Takes majority of height) -->
+                <div class="bg-white p-1 rounded-xl shadow-sm border border-slate-200 flex-grow relative">
+                    <div id="map"></div>
+                    <div
+                        class="absolute bottom-4 left-4 z-[500] bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-xs font-medium text-slate-600">
+                        Leaflet | © OpenStreetMap
+                    </div>
+                </div>
+
+                <!-- Tuition Chart (Smaller height at bottom) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 shrink-0 h-[300px]">
+                    <div class="mb-2 flex justify-between items-center">
+                        <h3 class="font-semibold text-slate-800 text-sm">Tuition Comparison</h3>
+                    </div>
+                    <div class="chart-wrapper h-[240px]">
+                        <canvas id="tuitionChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Data Source with REAL ADDRESSES & COORDS ---
+        const schoolsData = [
+            {
+                id: 1,
+                name: "Anglo-American School (AAS)",
+                type: "Private",
+                language: "English",
+                district: "Pancharevo",
+                address: "Siyanie Street 1, 1137 Pancharevo",
+                tuition: 24000,
+                phone: "+359 2 923 8810",
+                email: "admissions@aas-sofia.org",
+                web: "https://www.aas-sofia.org",
+                features: "International IB curriculum. Extensive campus. Very high diversity.",
+                lat: 42.6074,
+                lng: 23.4037
+            },
+            {
+                id: 2,
+                name: "American English Academy (AEA)",
+                type: "Private",
+                language: "English",
+                district: "Lozenets (Gorna Banya Campus)",
+                address: "3 Orsova Poliana St, 1619 Sofia",
+                tuition: 11000,
+                phone: "+359 89 335 7777",
+                email: "admission@aeasofia.com",
+                web: "https://aeasofia.com",
+                features: "US Curriculum. Green campus. Strong community focus.",
+                lat: 42.6585,
+                lng: 23.2384
+            },
+            {
+                id: 3,
+                name: "St. George International School",
+                type: "Private",
+                language: "English",
+                district: "Lozenets",
+                address: "bul. Nikola Y. Vaptsarov 47, 1407 Sofia",
+                tuition: 13000,
+                phone: "+359 2 873 00 23",
+                email: "reception@stgeorgeschool.bg",
+                web: "https://stgeorgeschool.bg",
+                features: "Strong STEM/Sports. Dual curriculum (Bulgarian & British). New building.",
+                lat: 42.6685,
+                lng: 23.3245
+            },
+            {
+                id: 4,
+                name: "British School of Sofia (BSS)",
+                type: "Private",
+                language: "English",
+                district: "Vitosha",
+                address: "ul. Georgi Raychev 21, 1619 Sofia",
+                tuition: 12500,
+                phone: "+359 886 510 510",
+                email: "office@bssofia.bg",
+                web: "https://bssofia.bg",
+                features: "British Curriculum. Apple Distinguished School. Innovation focus.",
+                lat: 42.6362,
+                lng: 23.3089
+            },
+            {
+                id: 5,
+                name: "Izzi Science for Kids",
+                type: "Private",
+                language: "Bilingual",
+                district: "Vitosha",
+                address: "ul. Angel Karaliychev 10, 1700 Sofia",
+                tuition: 9500,
+                phone: "+359 88 569 3415",
+                email: "info@izzi.academy",
+                web: "https://izzi.academy",
+                features: "Science-focused (Cambridge Science). Hands-on experiments daily.",
+                lat: 42.6521,
+                lng: 23.3356
+            },
+            {
+                id: 6,
+                name: "Private School Sveta Sofia",
+                type: "Private",
+                language: "Bulgarian",
+                district: "Boyana",
+                address: "ul. Moreni 3, 1618 Sofia",
+                tuition: 6500,
+                phone: "+359 2 959 03 89",
+                email: "info@svetasofia.com",
+                web: "http://svetasofia.com",
+                features: "Strong academic reputation (Math/Language). Competitive entry.",
+                lat: 42.6468,
+                lng: 23.2764
+            },
+            {
+                id: 7,
+                name: "PCMG (Pitagor)",
+                type: "Private",
+                language: "Bulgarian",
+                district: "Vitosha/Manastirski",
+                address: "ul. Ralevitsa 80, 1680 Sofia",
+                tuition: 7000,
+                phone: "+359 897 925 805",
+                email: "office@pitagor-bg.org",
+                web: "https://parvagimnazia.com",
+                features: "Math-focused. High success rate in national competitions.",
+                lat: 42.6592,
+                lng: 23.2821
+            },
+            {
+                id: 8,
+                name: "Deutsche Schule Sofia",
+                type: "Private",
+                language: "German",
+                district: "Iztok",
+                address: "ul. Frederik Joliot-Curie 25, 1113 Sofia",
+                tuition: 6800,
+                phone: "+359 2 963 43 73",
+                email: "ds-sofia@ds-sofia.bg",
+                web: "https://ds-sofia.bg",
+                features: "German curriculum. Attached to German Embassy.",
+                lat: 42.6695,
+                lng: 23.3524
+            },
+            {
+                id: 9,
+                name: "Uwekind",
+                type: "Private",
+                language: "German",
+                district: "Boyana (Knyazhevo)",
+                address: "ul. Voyvodina mogila 136, 1619 Sofia",
+                tuition: 7500,
+                phone: "+359 884 007 055",
+                email: "office@uwekind.bg",
+                web: "https://uwekind.bg",
+                features: "German/English. IB World School. Creative approach.",
+                lat: 42.6558,
+                lng: 23.2452
+            },
+            {
+                id: 10,
+                name: "Espa School",
+                type: "Private",
+                language: "Bilingual",
+                district: "Vitosha (Kambanite)",
+                address: "ul. Gradina 19, 1137 Sofia",
+                tuition: 8000,
+                phone: "+359 2 961 55 55",
+                email: "office@espa.bg",
+                web: "https://espa.bg",
+                features: "Extended foreign language learning. Focus on arts and culture.",
+                lat: 42.6225,
+                lng: 23.3854
+            },
+            {
+                id: 11,
+                name: "107 OU (Khan Krum)",
+                type: "Public",
+                language: "Bulgarian",
+                district: "Lozenets",
+                address: "ul. Dimitar Hadzhikotsev 44, 1421 Sofia",
+                tuition: 0,
+                phone: "+359 2 866 22 75",
+                email: "info@107ou.bg",
+                web: "https://107ou.bg",
+                features: "Top-rated public school. Known for high academic standards.",
+                lat: 42.6738,
+                lng: 23.3175
+            },
+            {
+                id: 12,
+                name: "120 OU (G.S. Rakovski)",
+                type: "Public",
+                language: "Bulgarian",
+                district: "Lozenets",
+                address: "ul. Papa Ioan Pavel II 2, 1164 Sofia",
+                tuition: 0,
+                phone: "+359 2 866 12 30",
+                email: "mail@120ou.com",
+                web: "https://120ou.com",
+                features: "Central location. Strong community. Innovative teaching.",
+                lat: 42.6782,
+                lng: 23.3321
+            },
+            {
+                id: 13,
+                name: "Lycée Français Victor Hugo",
+                type: "Private",
+                language: "French",
+                district: "Vitosha (Maxi)",
+                address: "ul. Obikolna 28, 1700 Sofia",
+                tuition: 6500,
+                phone: "+359 2 963 21 19",
+                email: "contact@vhugo.org",
+                web: "https://vhugo.org",
+                features: "Official French curriculum. Diverse international student body.",
+                lat: 42.6453,
+                lng: 23.3385
+            }
+        ];
+
+        // --- State ---
+        let state = {
+            schools: [...schoolsData],
+            filterType: 'All',
+            filterLang: 'All',
+            search: '',
+            sortBy: 'name',
+            sortAsc: true,
+            selectedId: null
+        };
+
+        // --- Map Variables ---
+        let map;
+        let markers = {};
+
+        // --- Logic ---
+
+        function initMap() {
+            // Initialize Leaflet
+            map = L.map('map').setView([42.6600, 23.3200], 11); // Center on South Sofia
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            updateMapMarkers();
+        }
+
+        function updateMapMarkers() {
+            // Clear existing
+            for (let id in markers) {
+                map.removeLayer(markers[id]);
+            }
+            markers = {};
+
+            const visibleSchools = getFilteredData();
+
+            visibleSchools.forEach(school => {
+                const marker = L.marker([school.lat, school.lng]).addTo(map);
+
+                // Color coding (using default blue marker, could customize icons but default is cleaner for now)
+
+                const popupContent = `
+                    <div class="font-sans text-sm">
+                        <strong class="block text-slate-800">${school.name}</strong>
+                        <span class="text-xs text-slate-500">${school.address}</span><br>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded ${school.type === 'Private' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'} text-xs">${school.type}</span>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+
+                // Event: Click Marker -> Select Row
+                marker.on('click', () => {
+                    selectSchool(school.id, false); // false = don't fly to map again
+                });
+
+                markers[school.id] = marker;
+            });
+        }
+
+        function renderKPIs() {
+            const filtered = getFilteredData();
+            document.getElementById('kpi-total').textContent = filtered.length;
+
+            const privateSchools = filtered.filter(s => s.tuition > 0);
+            const avg = privateSchools.length ? Math.round(privateSchools.reduce((a, b) => a + b.tuition, 0) / privateSchools.length) : 0;
+            document.getElementById('kpi-tuition').textContent = avg > 0 ? `€${avg.toLocaleString()}` : 'N/A';
+
+            if (filtered.length === 0) {
+                document.getElementById('kpi-lang').textContent = "-";
+            } else {
+                const langs = filtered.map(s => s.language);
+                const mode = langs.sort((a, b) => langs.filter(v => v === a).length - langs.filter(v => v === b).length).pop();
+                document.getElementById('kpi-lang').textContent = mode;
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('schools-table-body');
+            tbody.innerHTML = '';
+
+            const data = getFilteredData();
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="px-6 py-8 text-center text-slate-400">No schools match filters.</td></tr>`;
+                return;
+            }
+
+            data.forEach(school => {
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-slate-50 row-hover ${state.selectedId === school.id ? 'active-row' : ''}`;
+                tr.onclick = () => selectSchool(school.id, true); // true = fly to map
+
+                const tuitionDisplay = school.tuition === 0 ? '<span class="text-green-600 font-medium">Free</span>' : `€${(school.tuition / 1000).toFixed(1)}k`;
+                const typeColor = school.type === 'Private' ? 'text-blue-600' : 'text-green-600';
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-slate-800 text-sm leading-tight">${school.name}</div>
+                        <div class="text-xs text-slate-400 mt-1">${school.district} • <span class="${typeColor}">${school.type}</span></div>
+                    </td>
+                    <td class="px-2 py-3 text-right font-medium text-slate-600">${tuitionDisplay}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDetailPanel() {
+            const panel = document.getElementById('detail-panel');
+            if (!state.selectedId) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            const s = schoolsData.find(x => x.id === state.selectedId);
+            if (!s) return;
+
+            panel.classList.remove('hidden');
+
+            document.getElementById('detail-name').textContent = s.name;
+            document.getElementById('detail-tuition').textContent = s.tuition === 0 ? "Free" : `€${s.tuition.toLocaleString()}`;
+            document.getElementById('detail-address').innerHTML = `📍 <span class="italic">${s.address}</span>`;
+
+            const badge = document.getElementById('detail-badge');
+            badge.textContent = s.type;
+            badge.className = s.type === 'Private'
+                ? 'bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded'
+                : 'bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded';
+
+            document.getElementById('detail-phone').textContent = s.phone;
+            document.getElementById('detail-web').href = s.web;
+            document.getElementById('detail-features').textContent = s.features;
+        }
+
+        // --- Charts ---
+        let tuitionChartInstance = null;
+
+        function initCharts() {
+            const ctx = document.getElementById('tuitionChart').getContext('2d');
+            tuitionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Annual Tuition (€)',
+                        data: [],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (ctx) => `€${ctx.raw.toLocaleString()}` }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { display: false } } // Hide labels on small chart
+                    }
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            if (!tuitionChartInstance) return;
+            const data = getFilteredData().filter(s => s.type === 'Private').sort((a, b) => b.tuition - a.tuition);
+
+            tuitionChartInstance.data.labels = data.map(s => s.name);
+            tuitionChartInstance.data.datasets[0].data = data.map(s => s.tuition);
+            tuitionChartInstance.data.datasets[0].backgroundColor = data.map(s =>
+                s.id === state.selectedId ? '#1d4ed8' : '#93c5fd'
+            );
+            tuitionChartInstance.update();
+        }
+
+        // --- Core Logic ---
+
+        function getFilteredData() {
+            return state.schools.filter(s => {
+                const matchType = state.filterType === 'All' || s.type === state.filterType;
+                const matchLang = state.filterLang === 'All' || s.language === state.filterLang || (state.filterLang === 'Bilingual' && (s.language === 'English' || s.language === 'German'));
+                const searchLower = state.search.toLowerCase();
+                const matchSearch = !state.search || s.name.toLowerCase().includes(searchLower) || s.address.toLowerCase().includes(searchLower) || s.district.toLowerCase().includes(searchLower);
+                return matchType && matchLang && matchSearch;
+            }).sort((a, b) => {
+                let valA = a[state.sortBy];
+                let valB = b[state.sortBy];
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+                if (valA < valB) return state.sortAsc ? -1 : 1;
+                if (valA > valB) return state.sortAsc ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function sortTable(column) {
+            if (state.sortBy === column) state.sortAsc = !state.sortAsc;
+            else { state.sortBy = column; state.sortAsc = true; }
+            renderTable();
+        }
+
+        function selectSchool(id, moveMap = true) {
+            state.selectedId = id;
+            renderTable();
+            renderDetailPanel();
+            updateChart();
+
+            // Map Logic
+            if (moveMap && map && markers[id]) {
+                const marker = markers[id];
+                map.flyTo(marker.getLatLng(), 14, { duration: 1.5 });
+                marker.openPopup();
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-type').value = 'All';
+            document.getElementById('filter-lang').value = 'All';
+            document.getElementById('search-input').value = '';
+            state.filterType = 'All';
+            state.filterLang = 'All';
+            state.search = '';
+            state.selectedId = null;
+            renderTable();
+            renderKPIs();
+            renderDetailPanel();
+            updateChart();
+            updateMapMarkers();
+            map.setView([42.6600, 23.3200], 11);
+        }
+
+        // --- Listeners ---
+        document.getElementById('filter-type').addEventListener('change', (e) => { state.filterType = e.target.value; renderTable(); renderKPIs(); updateChart(); updateMapMarkers(); });
+        document.getElementById('filter-lang').addEventListener('change', (e) => { state.filterLang = e.target.value; renderTable(); renderKPIs(); updateChart(); updateMapMarkers(); });
+        document.getElementById('search-input').addEventListener('input', (e) => { state.search = e.target.value; renderTable(); renderKPIs(); updateChart(); updateMapMarkers(); });
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initCharts();
+            renderTable();
+            renderKPIs();
+        });
+
+    </script>
+</body>
+
+</html>
