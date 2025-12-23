@@ -339,6 +339,7 @@ const schoolsData = [
         email: "",
         web: "https://discovermontessori.bg",
         features: "IB World School (PYP/MYP). Montessori method. 2025/26 Tuition (2026/27 pending).",
+        pedagogy: "Montessori",
         lat: 42.6650,
         lng: 23.3200
     },
@@ -441,6 +442,27 @@ const schoolsData = [
         features: "Hosts math competitions. Strong STEM reputation. Source: Danybon math competition mentions.",
         lat: 42.6530,
         lng: 23.3785
+    },
+    {
+        id: 23,
+        name: "Waldorf School (Prof. Nikolay Raynov)",
+        type: "Private",
+        language: "Bulgarian",
+        district: "Iztok",
+        address: "ul. Alexander von Humboldt 7, 1113 Sofia",
+        tuition: 5750,
+        oneTimeFee: "Contact school",
+        foodFee: "Included",
+        transportFee: "Optional",
+        currency: "EUR",
+        feeNotes: "Monthly fee ~575 BGN. Licensed by German Waldorf Federation.",
+        phone: "+359 894 377 903",
+        email: "admission@waldorf.bg",
+        web: "https://www.waldorf.bg",
+        features: "Anthroposophic/Waldorf pedagogy. Arts, crafts, eurythmy, gardening. Individual approach. Est. 2011.",
+        pedagogy: "Anthroposophic",
+        lat: 42.6771,
+        lng: 23.3615
     }
 ];
 
