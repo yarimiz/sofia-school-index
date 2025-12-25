@@ -448,7 +448,7 @@ const schoolsData = [
         name: "Waldorf School (Prof. Nikolay Raynov)",
         type: "Private",
         language: "Bulgarian",
-        district: "Iztok",
+        district: "Geo Milev",
         address: "ul. Alexander von Humboldt 7, 1113 Sofia",
         tuition: 5750,
         oneTimeFee: "Contact school",
@@ -458,11 +458,11 @@ const schoolsData = [
         feeNotes: "Monthly fee ~575 BGN. Licensed by German Waldorf Federation.",
         phone: "+359 894 377 903",
         email: "admission@waldorf.bg",
-        web: "https://www.waldorf.bg",
+        web: "https://waldorf.bg/en/",
         features: "Anthroposophic/Waldorf pedagogy. Arts, crafts, eurythmy, gardening. Individual approach. Est. 2011.",
         pedagogy: "Anthroposophic",
-        lat: 42.6771,
-        lng: 23.3615
+        lat: 42.6785,
+        lng: 23.3630
     }
 ];
 
